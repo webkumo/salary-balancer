@@ -1,4 +1,4 @@
-package net.webcumo.test.exercise106.exceptions.parser;
+package net.webcumo.test.exercise106.exceptions.builder;
 
 import net.webcumo.test.exercise106.employee.Employee;
 import net.webcumo.test.exercise106.exceptions.DataProcessingException;

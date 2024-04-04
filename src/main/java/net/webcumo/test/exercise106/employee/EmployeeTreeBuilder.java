@@ -1,6 +1,6 @@
 package net.webcumo.test.exercise106.employee;
 
-import net.webcumo.test.exercise106.exceptions.parser.EmployeeIdAlreadyUsedException;
+import net.webcumo.test.exercise106.exceptions.builder.EmployeeIdAlreadyUsedException;
 import net.webcumo.test.exercise106.exceptions.builder.NoCeoFoundException;
 import net.webcumo.test.exercise106.exceptions.builder.OrphansFoundException;
 import net.webcumo.test.exercise106.exceptions.builder.TooManyCeosException;
