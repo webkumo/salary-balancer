@@ -72,14 +72,7 @@ public class Employee {
 
     @Override
     public String toString() {
-        return "Employee{" +
-                "parent=" + parent +
-                ", id=" + id +
-                ", lastName='" + lastName + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", salary=" + salary +
-                ", subordinates, count=" + subordinates.size() +
-                '}';
+        return lastName + " " + firstName + " (" + id + ")";
     }
 
     @Override

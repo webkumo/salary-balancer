@@ -2,6 +2,7 @@ package net.webcumo.test.exercise106.parser;
 
 import net.webcumo.test.exercise106.exceptions.file.FileIOException;
 import net.webcumo.test.exercise106.exceptions.file.FileIsEmptyException;
+import net.webcumo.test.exercise106.exceptions.file.FileIsTooLongException;
 import net.webcumo.test.exercise106.exceptions.file.WrongHeaderException;
 
 import java.io.IOException;
@@ -14,9 +15,14 @@ public class EmployeeFileParser implements EmployeeStringsSource {
     private static final String HEADER = "Id,firstName,lastName,salary,managerId";
 
     private final String fileName;
+    private final int maxLines;
 
     public EmployeeFileParser(String fileName) {
         this.fileName = fileName;
+        String maxLinesStr = System.getProperty("max_lines");
+        this.maxLines = maxLinesStr == null
+                ? 1000
+                : Integer.parseInt(maxLinesStr);
     }
 
     @Override
@@ -38,6 +44,9 @@ public class EmployeeFileParser implements EmployeeStringsSource {
         String header = strings.getFirst();
         if (!header.equals(HEADER)) {
             throw new WrongHeaderException(HEADER);
+        }
+        if (strings.size() > maxLines + 1) {
+            throw new FileIsTooLongException(maxLines);
         }
     }
 }

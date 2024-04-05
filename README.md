@@ -8,12 +8,12 @@ verifies that:
 of it's subordinates
 * No one manager gets salary < 120% of average
 of it's subordinates
-* The company structure is flat, i.e.
-between any employee and CEO there is not more than 5
+* The company structure is flat, i.e. between any
+employee and the CEO there is not more than 4
 managers
 
-If there any violations - they will be printed in 
-system.out stream.
+If there are any violations - they will be printed in 
+`System.out` stream.
 
 ### Run
 
@@ -22,9 +22,10 @@ first parameter. If you wouldn't the default
 `company.csv` will be used.
 
 ### File format
-
-File format - csv, delimiter - ,
-File header:
+* File size - can be configured by environment variable
+`max_lines`
+* File format - csv, delimiter - ,
+* File header:
 ```
 Id,firstName,lastName,salary,managerId
 ```
@@ -41,8 +42,10 @@ Id,firstName,lastName,salary,managerId
 
 ### Possible problems
 If there is any problem during parsing file you will
-get an error code and additional information in
-System.err stream:
+get an error code (as it is the best way to make
+scripts that use console app) and additional
+information in `System.err` stream (to make answer
+verbose for user):
 * Error code 1 if file wasn't found 
 * Error code 2 if found several employees with the
 same id
@@ -52,3 +55,5 @@ with the id that is set for them as parent
 * Error code 4 if found more than one CEO
 * Error code 5 if there is no CEO found in file
 * Error code 6 if different errors about format
+* Error code 7 if file is too long
+(default - 1000 employees)

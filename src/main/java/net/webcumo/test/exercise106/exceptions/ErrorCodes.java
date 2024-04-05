@@ -7,6 +7,7 @@ public enum ErrorCodes {
     TOO_MANY_CEOS(0x0004),
     NO_CEO(0x0005),
     WRONG_FORMAT(0x0006),
+    FILE_TOO_LONG(0x0007),
     ;
     private final int errorCode;
 

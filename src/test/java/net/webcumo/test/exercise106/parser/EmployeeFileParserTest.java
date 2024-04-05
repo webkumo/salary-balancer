@@ -2,6 +2,7 @@ package net.webcumo.test.exercise106.parser;
 
 import net.webcumo.test.exercise106.exceptions.file.FileIOException;
 import net.webcumo.test.exercise106.exceptions.file.FileIsEmptyException;
+import net.webcumo.test.exercise106.exceptions.file.FileIsTooLongException;
 import net.webcumo.test.exercise106.exceptions.file.WrongHeaderException;
 import org.junit.jupiter.api.Test;
 
@@ -43,5 +44,17 @@ class EmployeeFileParserTest {
         } catch (FileIsEmptyException e) {
             assertEquals("There is nothing to parse in the file", e.getMessage());
         }
+    }
+
+    @Test
+    void givenFileTooLongThenException() {
+        try {
+            System.setProperty("max_lines", "3");
+            new EmployeeFileParser("src/test/resources/long.csv").getStrings();
+            fail();
+        } catch (FileIsTooLongException e) {
+            assertEquals("The file contains more lines than configured as maximum(3)", e.getMessage());
+        }
+        System.setProperty("max_lines", "1000");
     }
 }

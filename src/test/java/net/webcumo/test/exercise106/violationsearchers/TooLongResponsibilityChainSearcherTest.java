@@ -46,15 +46,16 @@ class TooLongResponsibilityChainSearcherTest {
     void givenChainOf6ThenMessagesExpected() {
         searcher.searchViolations(EmployeeTestsBuilder.getTooBigChainViolation());
         String errorMessages = captor.toString();
-        assertTrue(errorMessages.contains(getViolationMessage(15)));
-        assertTrue(errorMessages.contains(getViolationMessage(16)));
-        assertTrue(errorMessages.contains(getViolationMessage(14)));
-        assertTrue(errorMessages.contains(getViolationMessage(17)));
+        assertTrue(errorMessages.contains(getViolationMessage(15, 5)));
+        assertTrue(errorMessages.contains(getViolationMessage(16, 6)));
+        assertTrue(errorMessages.contains(getViolationMessage(14, 5)));
+        assertTrue(errorMessages.contains(getViolationMessage(17, 6)));
         assertEquals(4, errorMessages.split("\n").length);
     }
 
-    private static String getViolationMessage(int id) {
-        return TooLongResponsibilityChainSearcher.VIOLATION.formatted("Doe" + id, "Joe", id);
+    private static String getViolationMessage(int id, int count) {
+        return TooLongResponsibilityChainSearcher.VIOLATION
+                .formatted(EmployeeTestsBuilder.getEmployee(id), count);
     }
 
 }
