@@ -59,7 +59,7 @@ with the id that is set for them as parent
 (default - 1000 employees)
 
 ### Assumptions applied for the task
-* Input file name: it much better for console app to
+* Input file name: it is much better for console app to
 be able to get it as a parameter, but also provided
 default value
 * Output on violations: made to `System.out` each on
@@ -68,7 +68,7 @@ to file with console instruments (`>` or `>>`)
 * In case of problems during parsing: output to
 `System.err` and provide error code - in case if
 user wants to add this program in some script
-chain it is much easier if he have error codes,
+chain it is much easier if he has error codes,
 `System.err` was chosen to make difference with
 normal application answer
 * Parsing problems: I decided to consider as

@@ -19,7 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SalaryBalancerTest {
+class SalaryBalancerIntegrationTest {
     private static final PrintStream DEFAULT_OUT = System.out;
     private static final PrintStream DEFAULT_ERR = System.err;
 

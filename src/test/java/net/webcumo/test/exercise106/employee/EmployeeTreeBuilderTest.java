@@ -1,6 +1,6 @@
 package net.webcumo.test.exercise106.employee;
 
-import net.webcumo.test.exercise106.EmployeeTestsBuilder;
+import net.webcumo.test.exercise106.EmployeeTestsCasesBuilder;
 import net.webcumo.test.exercise106.exceptions.builder.NoCeoFoundException;
 import net.webcumo.test.exercise106.exceptions.builder.OrphansFoundException;
 import net.webcumo.test.exercise106.exceptions.builder.TooManyCeosException;
@@ -31,7 +31,7 @@ class EmployeeTreeBuilderTest {
     @Test
     void givenNoCeoThanException() {
         List<EmployeeWithParentId> employees = Collections.singletonList(
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(10), 11L));
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(10), 11L));
         EmployeesSource source = employees::stream;
         EmployeeTreeBuilder builder = new EmployeeTreeBuilder(source);
         try {
@@ -45,8 +45,8 @@ class EmployeeTreeBuilderTest {
     @Test
     void givenMoreThanOneCeoThanException() {
         List<EmployeeWithParentId> employees = List.of(
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(0), null),
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(10), null));
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(0), null),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(10), null));
         EmployeesSource source = employees::stream;
         EmployeeTreeBuilder builder = new EmployeeTreeBuilder(source);
         try {
@@ -60,10 +60,10 @@ class EmployeeTreeBuilderTest {
     @Test
     void givenOrphansExistThanException() {
         List<EmployeeWithParentId> employees = List.of(
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(0), null),
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(10), 0L),
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(11), 10L),
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(12), 8L)
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(0), null),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(10), 0L),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(11), 10L),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(12), 8L)
                 );
         EmployeesSource source = employees::stream;
         EmployeeTreeBuilder builder = new EmployeeTreeBuilder(source);
@@ -78,21 +78,24 @@ class EmployeeTreeBuilderTest {
     @Test
     void givenCorrectConfigurationThanTreeIsBuilt() {
         List<EmployeeWithParentId> employees = List.of(
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(0), null),
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(10), 0L),
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(11), 10L),
-                new EmployeeWithParentId(EmployeeTestsBuilder.getEmployee(12), 10L)
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(0), null),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(11), 10L),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(10), 0L),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(12), 10L)
                 );
         EmployeesSource source = employees::stream;
         EmployeeTreeBuilder builder = new EmployeeTreeBuilder(source);
-        Employee ceo = builder.build();
-        assertEquals(0, ceo.getId());
+        EmployeeTreeElement ceo = builder.build();
+        assertEquals(0, ceo.getEmployee().id());
         assertEquals(1, ceo.getSubordinates().size());
-        Employee manager = ceo.getSubordinates().getFirst();
-        assertEquals(10, manager.getId());
+        EmployeeTreeElement manager = ceo.getSubordinates().getFirst();
+        assertEquals(10, manager.getEmployee().id());
         assertEquals(2, manager.getSubordinates().size());
         assertEquals(2,
-                manager.getSubordinates().stream().filter(e -> e.getId() == 11 || e.getId() == 12).count());
+                manager.getSubordinates().stream()
+                        .map(EmployeeTreeElement::getEmployee)
+                        .filter(e -> e.id() == 11 || e.id() == 12)
+                        .count());
     }
 
 }

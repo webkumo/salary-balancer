@@ -14,9 +14,9 @@ import java.util.Map;
 
 public class EmployeeTreeBuilder {
 
-    private final Map<Long, Employee> employees = new HashMap<>();
-    private final Map<Long, List<Employee>> subordinatesCache = new HashMap<>();
-    private Employee ceo;
+    private final Map<Long, EmployeeTreeElement> employees = new HashMap<>();
+    private final Map<Long, List<EmployeeTreeElement>> subordinatesCache = new HashMap<>();
+    private EmployeeTreeElement ceo;
 
     private final EmployeesSource source;
 
@@ -24,7 +24,7 @@ public class EmployeeTreeBuilder {
         this.source = source;
     }
 
-    public Employee build() {
+    public EmployeeTreeElement build() {
         source.getEmployees().forEach(this::addEmployee);
         validateCeo();
         validateNoOrphans();
@@ -41,6 +41,7 @@ public class EmployeeTreeBuilder {
         if (!subordinatesCache.isEmpty()) {
             List<String> orphans = subordinatesCache.values().stream()
                     .flatMap(List::stream)
+                    .map(EmployeeTreeElement::getEmployee)
                     .map(Employee::toString)
                     .toList();
             throw new OrphansFoundException(orphans);
@@ -48,24 +49,25 @@ public class EmployeeTreeBuilder {
     }
 
     private void addEmployee(EmployeeWithParentId employeeWithParentId) {
+        EmployeeTreeElement treeElement = new EmployeeTreeElement(employeeWithParentId.employee());
         if (employeeWithParentId.parentId() == null) {
-            setCeo(employeeWithParentId.employee());
+            setCeo(treeElement);
         } else {
-            addSubordinate(employeeWithParentId.employee(), employeeWithParentId.parentId());
+            addSubordinate(treeElement, employeeWithParentId.parentId());
         }
-        registerEmployee(employeeWithParentId.employee());
+        registerEmployee(treeElement);
     }
 
-    private void setCeo(Employee employee) {
+    private void setCeo(EmployeeTreeElement employee) {
         if (ceo == null) {
             ceo = employee;
         } else {
-            throw new TooManyCeosException(ceo, employee);
+            throw new TooManyCeosException(ceo.getEmployee(), employee.getEmployee());
         }
     }
 
-    private void addSubordinate(Employee employee, Long parentId) {
-        Employee head = employees.get(parentId);
+    private void addSubordinate(EmployeeTreeElement employee, Long parentId) {
+        EmployeeTreeElement head = employees.get(parentId);
         if (head != null) {
             head.addSubordinate(employee);
         } else {
@@ -73,17 +75,17 @@ public class EmployeeTreeBuilder {
                     .add(employee);
         }
 
-        List<Employee> subordinates = subordinatesCache.get(employee.getId());
+        List<EmployeeTreeElement> subordinates = subordinatesCache.get(employee.getEmployee().id());
         if (subordinates != null) {
             employee.addSubordinates(subordinates);
-            subordinatesCache.remove(employee.getId());
+            subordinatesCache.remove(employee.getEmployee().id());
         }
     }
 
-    private void registerEmployee(Employee employee) {
-        Employee alreadyRegistered = employees.putIfAbsent(employee.getId(), employee);
+    private void registerEmployee(EmployeeTreeElement employee) {
+        EmployeeTreeElement alreadyRegistered = employees.putIfAbsent(employee.getEmployee().id(), employee);
         if (alreadyRegistered != null) {
-            throw new EmployeeIdAlreadyUsedException(employee, alreadyRegistered);
+            throw new EmployeeIdAlreadyUsedException(employee.getEmployee(), alreadyRegistered.getEmployee());
         }
     }
 }
