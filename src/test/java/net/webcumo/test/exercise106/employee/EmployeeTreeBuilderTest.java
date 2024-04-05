@@ -79,8 +79,8 @@ class EmployeeTreeBuilderTest {
     void givenCorrectConfigurationThanTreeIsBuilt() {
         List<EmployeeWithParentId> employees = List.of(
                 new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(0), null),
-                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(10), 0L),
                 new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(11), 10L),
+                new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(10), 0L),
                 new EmployeeWithParentId(EmployeeTestsCasesBuilder.getEmployee(12), 10L)
                 );
         EmployeesSource source = employees::stream;
