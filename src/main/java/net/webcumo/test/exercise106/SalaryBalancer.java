@@ -1,7 +1,7 @@
 package net.webcumo.test.exercise106;
 
-import net.webcumo.test.exercise106.employee.Employee;
 import net.webcumo.test.exercise106.employee.EmployeeTreeBuilder;
+import net.webcumo.test.exercise106.employee.EmployeeTreeElement;
 import net.webcumo.test.exercise106.exceptions.DataProcessingException;
 import net.webcumo.test.exercise106.parser.EmployeeFileParser;
 import net.webcumo.test.exercise106.parser.EmployeesStringParser;
@@ -41,7 +41,7 @@ public class SalaryBalancer implements Runnable {
     @Override
     public void run() {
         try {
-            Employee ceo = builder.build();
+            EmployeeTreeElement ceo = builder.build();
             violationSearchers.stream().parallel()
                     .forEach(searcher -> searcher.searchViolations(ceo));
         } catch (DataProcessingException e) {

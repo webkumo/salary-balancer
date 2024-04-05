@@ -1,24 +1,23 @@
 package net.webcumo.test.exercise106.violationsearchers;
 
-import net.webcumo.test.exercise106.employee.Employee;
+import net.webcumo.test.exercise106.employee.EmployeeTreeElement;
 
-public class ManagersSalaryTooLowSearcher implements ViolationSearcher {
-    static final String VIOLATION = "Manager %s %s (%s) has lower than 120%% of it's subordinates average.%n";
+public class ManagersSalaryTooLowSearcher extends AbstractManagerViolationSearcher {
+    static final String VIOLATION = "Manager %s has lower than 120%% of it's subordinates average.%n";
 
     @Override
-    public void searchViolations(Employee ceo) {
-        if (ceo.isNotManager()) {
-            return;
+    public void searchViolations(EmployeeTreeElement ceo) {
+        if (ceo.hasSubordinates()) {
+            searchViolationsOnManager(ceo);
         }
-        searchViolationsOnManager(ceo);
     }
 
-    public void searchViolationsOnManager(Employee manager) {
-        if (manager.getSalary() < manager.getSubordinatesAverageSalary() * 1.2) {
-            System.out.printf(VIOLATION, manager.getLastName(), manager.getFirstName(), manager.getId());
+    public void searchViolationsOnManager(EmployeeTreeElement manager) {
+        if (manager.getEmployee().salary() < calculateSubordinatesAverageSalary(manager) * 1.2) {
+            System.out.printf(VIOLATION, manager.getEmployee());
         }
         manager.getSubordinates().parallelStream()
-                .filter(Employee::isManager)
+                .filter(EmployeeTreeElement::hasSubordinates)
                 .forEach(this::searchViolationsOnManager);
     }
 
