@@ -57,3 +57,29 @@ with the id that is set for them as parent
 * Error code 6 if different errors about format
 * Error code 7 if file is too long
 (default - 1000 employees)
+
+### Assumptions applied for the task
+* Input file name: it much better for console app to
+be able to get it as a parameter, but also provided
+default value
+* Output on violations: made to `System.out` each on
+new line, if user wants he can easily redirect it
+to file with console instruments (`>` or `>>`)
+* In case of problems during parsing: output to
+`System.err` and provide error code - in case if
+user wants to add this program in some script
+chain it is much easier if he have error codes,
+`System.err` was chosen to make difference with
+normal application answer
+* Parsing problems: I decided to consider as
+source file problem next cases:
+  * no file or file cannot be read
+  * file doesn't have exact header
+  * file has only the header (so it is nothing to analyze)
+  * file doesn't contain the CEO
+  * file contains more than one CEO
+  * file has several employees with same id
+  * file has orphans - any employees that has parent id for which there are no employee exists
+  * file has non-numeric value in numeric field
+  * file has entry with wrong number of fields
+  * file is too long
