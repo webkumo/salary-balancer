@@ -1,17 +1,18 @@
-package net.webcumo.test.exercise106.employee;
+package net.webcumo.test.exercise106.violationsearchers;
 
+import net.webcumo.test.exercise106.EmployeeTestsCasesBuilder;
 import net.webcumo.test.exercise106.exceptions.employee.CannotCalculateAverageSalaryException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EmployeeTest {
+class AbstractManagerViolationSearcherTest {
 
     @Test
     void givenEmployeeWithNoSubordinatesThenExceptionOnAverageCall() {
-        Employee employee = new Employee(10 ,"Doe", "Joe", 2000);
+        AbstractManagerViolationSearcher searcher = new ManagersSalaryTooHighSearcher();
         try {
-            employee.getSubordinatesAverageSalary();
+            searcher.calculateSubordinatesAverageSalary(EmployeeTestsCasesBuilder.getNotManager());
             fail();
         } catch (CannotCalculateAverageSalaryException e) {
             //ok

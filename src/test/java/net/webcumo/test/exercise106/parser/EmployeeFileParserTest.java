@@ -1,5 +1,6 @@
 package net.webcumo.test.exercise106.parser;
 
+import net.webcumo.test.exercise106.exceptions.ErrorCodes;
 import net.webcumo.test.exercise106.exceptions.file.FileIOException;
 import net.webcumo.test.exercise106.exceptions.file.FileIsEmptyException;
 import net.webcumo.test.exercise106.exceptions.file.FileIsTooLongException;
@@ -53,6 +54,7 @@ class EmployeeFileParserTest {
             new EmployeeFileParser("src/test/resources/long.csv").getStrings();
             fail();
         } catch (FileIsTooLongException e) {
+            assertEquals(ErrorCodes.FILE_TOO_LONG.getErrorCode(), e.getErrorCode());
             assertEquals("The file contains more lines than configured as maximum(3)", e.getMessage());
         }
         System.setProperty("max_lines", "1000");

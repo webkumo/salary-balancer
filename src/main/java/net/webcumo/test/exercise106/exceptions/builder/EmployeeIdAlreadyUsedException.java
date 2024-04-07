@@ -8,7 +8,7 @@ public class EmployeeIdAlreadyUsedException extends DataProcessingException {
     private static final String ERROR_MESSAGE = "Cannot add user %s. The user with id %s is already registered: %s.";
 
     public EmployeeIdAlreadyUsedException(Employee employee, Employee alreadyRegistered) {
-        super(ERROR_MESSAGE.formatted(employee, employee.getId(), alreadyRegistered),
+        super(ERROR_MESSAGE.formatted(employee, employee.id(), alreadyRegistered),
                 ErrorCodes.ALREADY_USED.getErrorCode());
     }
 }
