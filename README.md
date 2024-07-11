@@ -1,5 +1,7 @@
 # salary-balancer - exercise 106
 
+### The entry point (class that runs console app) [SalaryBalancerInitializer](https://github.com/webkumo/salary-balancer/blob/main/src/main/java/net/webcumo/test/exercise106/SalaryBalancerInitializer.java)
+
 ### Functionality
 
 An application that gets file with employees and
