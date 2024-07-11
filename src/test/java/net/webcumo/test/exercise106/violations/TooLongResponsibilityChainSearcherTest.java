@@ -1,6 +1,7 @@
-package net.webcumo.test.exercise106.violationsearchers;
+package net.webcumo.test.exercise106.violations;
 
 import net.webcumo.test.exercise106.EmployeeTestsCasesBuilder;
+import net.webcumo.test.exercise106.employee.Employee;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,7 @@ class TooLongResponsibilityChainSearcherTest {
     private static final PrintStream DEFAULT = System.out;
 
     private ByteArrayOutputStream captor;
-    private ViolationSearcher searcher;
+    private ViolationSearcher<Employee> searcher;
 
 
     @BeforeEach
@@ -46,16 +47,16 @@ class TooLongResponsibilityChainSearcherTest {
     void givenChainOf6ThenMessagesExpected() {
         searcher.searchViolations(EmployeeTestsCasesBuilder.getTooBigChainViolation());
         String errorMessages = captor.toString();
-        assertTrue(errorMessages.contains(getViolationMessage(15, 5)));
-        assertTrue(errorMessages.contains(getViolationMessage(16, 6)));
-        assertTrue(errorMessages.contains(getViolationMessage(14, 5)));
-        assertTrue(errorMessages.contains(getViolationMessage(17, 6)));
+        assertTrue(errorMessages.contains(getViolationMessage(14, 5, 11L)));
+        assertTrue(errorMessages.contains(getViolationMessage(15, 5, 11L)));
+        assertTrue(errorMessages.contains(getViolationMessage(16, 6, 12L)));
+        assertTrue(errorMessages.contains(getViolationMessage(17, 6, 12L)));
         assertEquals(4, errorMessages.split("\n").length);
     }
 
-    private static String getViolationMessage(int id, int count) {
+    private static String getViolationMessage(int id, int level, Long parentId) {
         return TooLongResponsibilityChainSearcher.VIOLATION
-                .formatted(EmployeeTestsCasesBuilder.getEmployeeElement(id).getEmployee(), count);
+                .formatted(EmployeeTestsCasesBuilder.getEmployee(id, parentId), level);
     }
 
 }

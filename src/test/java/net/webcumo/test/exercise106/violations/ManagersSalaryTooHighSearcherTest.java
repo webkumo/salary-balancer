@@ -1,29 +1,28 @@
-package net.webcumo.test.exercise106.violationsearchers;
+package net.webcumo.test.exercise106.violations;
 
 import net.webcumo.test.exercise106.EmployeeTestsCasesBuilder;
+import net.webcumo.test.exercise106.employee.Employee;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-class ManagersSalaryTooLowSearcherTest {
+class ManagersSalaryTooHighSearcherTest {
     private static final PrintStream DEFAULT = System.out;
 
     private ByteArrayOutputStream captor;
-    private ViolationSearcher searcher;
+    private ViolationSearcher<Employee> searcher;
 
 
     @BeforeEach
     public void setUp() {
         captor = new ByteArrayOutputStream();
         System.setOut(new PrintStream(captor));
-        searcher = new ManagersSalaryTooLowSearcher();
+        searcher = new ManagersSalaryTooHighSearcher();
     }
 
     @AfterEach
@@ -32,9 +31,9 @@ class ManagersSalaryTooLowSearcherTest {
     }
 
     @Test
-    void givenEmployeeWithNoSubordinatesThenOk() {
+    void givenNotAManagerThenNoMessageExpected() {
         searcher.searchViolations(EmployeeTestsCasesBuilder.getNotManager());
-        Assertions.assertEquals(0, captor.size());
+        assertEquals(0, captor.size());
     }
 
     @Test
@@ -45,17 +44,16 @@ class ManagersSalaryTooLowSearcherTest {
 
     @Test
     void givenManagerWithViolationsThenMessagesExpected() {
-        searcher.searchViolations(EmployeeTestsCasesBuilder.get3ManagersWithTooLowViolation());
+        searcher.searchViolations(EmployeeTestsCasesBuilder.get3ManagersWithTooHighViolation());
         String errorMessages = captor.toString();
-        assertTrue(errorMessages.contains(getViolationMessage(0)));
-        assertTrue(errorMessages.contains(getViolationMessage(2)));
-        assertTrue(errorMessages.contains(getViolationMessage(4)));
+        assertTrue(errorMessages.contains(getViolationMessage(0, null)));
+        assertTrue(errorMessages.contains(getViolationMessage(2, 0L)));
+        assertTrue(errorMessages.contains(getViolationMessage(3, 1L)));
         assertEquals(3, errorMessages.split("\n").length);
     }
 
-    private static String getViolationMessage(int id) {
-        return ManagersSalaryTooLowSearcher.VIOLATION
-                .formatted(EmployeeTestsCasesBuilder.getEmployeeElement(id).getEmployee());
+    private static String getViolationMessage(int id, Long parentId) {
+        return ManagersSalaryTooHighSearcher.VIOLATION.formatted(
+                EmployeeTestsCasesBuilder.getEmployee(id, parentId));
     }
-
 }

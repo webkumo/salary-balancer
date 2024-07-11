@@ -1,12 +1,14 @@
 package net.webcumo.test.exercise106;
 
-import net.webcumo.test.exercise106.employee.EmployeeTreeBuilder;
+import net.webcumo.test.exercise106.employee.Employee;
+import net.webcumo.test.exercise106.employee.EmployeeTreBuilder;
+import net.webcumo.test.exercise106.tree.TreeBuilder;
 import net.webcumo.test.exercise106.parser.EmployeeFileParser;
 import net.webcumo.test.exercise106.parser.EmployeesStringParser;
-import net.webcumo.test.exercise106.violationsearchers.ManagersSalaryTooHighSearcher;
-import net.webcumo.test.exercise106.violationsearchers.ManagersSalaryTooLowSearcher;
-import net.webcumo.test.exercise106.violationsearchers.TooLongResponsibilityChainSearcher;
-import net.webcumo.test.exercise106.violationsearchers.ViolationSearcher;
+import net.webcumo.test.exercise106.violations.ManagersSalaryTooHighSearcher;
+import net.webcumo.test.exercise106.violations.ManagersSalaryTooLowSearcher;
+import net.webcumo.test.exercise106.violations.TooLongResponsibilityChainSearcher;
+import net.webcumo.test.exercise106.violations.ViolationSearcher;
 
 import java.util.List;
 
@@ -28,13 +30,13 @@ public class SalaryBalancerInitializer {
                 new ExitOnErrorCode());
     }
 
-    static EmployeeTreeBuilder configureBuilder(String fileName) {
-        return new EmployeeTreeBuilder(
+    static TreeBuilder<Employee> configureBuilder(String fileName) {
+        return new EmployeeTreBuilder(
                 new EmployeesStringParser(
                         new EmployeeFileParser(fileName)));
     }
 
-    static List<ViolationSearcher> configureViolationSearchers() {
+    static List<ViolationSearcher<Employee>> configureViolationSearchers() {
         return List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());

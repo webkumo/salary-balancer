@@ -1,19 +1,20 @@
 package net.webcumo.test.exercise106;
 
-import net.webcumo.test.exercise106.employee.EmployeeTreeBuilder;
-import net.webcumo.test.exercise106.employee.EmployeeTreeElement;
+import net.webcumo.test.exercise106.employee.Employee;
+import net.webcumo.test.exercise106.tree.TreeBuilder;
+import net.webcumo.test.exercise106.tree.TreeElement;
 import net.webcumo.test.exercise106.exceptions.DataProcessingException;
-import net.webcumo.test.exercise106.violationsearchers.ViolationSearcher;
+import net.webcumo.test.exercise106.violations.ViolationSearcher;
 
 import java.util.List;
 
 public class SalaryBalancer implements Runnable {
-    private final EmployeeTreeBuilder builder;
-    private final List<ViolationSearcher> violationSearchers;
+    private final TreeBuilder<Employee> builder;
+    private final List<ViolationSearcher<Employee>> violationSearchers;
     private final ErrorCodeListener errorCodeListener;
 
-    public SalaryBalancer(EmployeeTreeBuilder builder,
-                          List<ViolationSearcher> violationSearchers,
+    public SalaryBalancer(TreeBuilder<Employee> builder,
+                          List<ViolationSearcher<Employee>> violationSearchers,
                           ErrorCodeListener errorCodeListener) {
         this.builder = builder;
         this.violationSearchers = violationSearchers;
@@ -23,12 +24,12 @@ public class SalaryBalancer implements Runnable {
     @Override
     public void run() {
         try {
-            EmployeeTreeElement ceo = builder.build();
+            TreeElement<Employee> ceo = builder.build();
             violationSearchers.stream().parallel()
                     .forEach(searcher -> searcher.searchViolations(ceo));
         } catch (DataProcessingException e) {
             System.err.println(e.getMessage());
-            errorCodeListener.registerErrorCode(e.getErrorCode());
+            errorCodeListener.registerErrorCode(e);
         }
     }
 }

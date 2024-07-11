@@ -1,9 +1,10 @@
 package net.webcumo.test.exercise106;
 
-import net.webcumo.test.exercise106.violationsearchers.ManagersSalaryTooHighSearcher;
-import net.webcumo.test.exercise106.violationsearchers.ManagersSalaryTooLowSearcher;
-import net.webcumo.test.exercise106.violationsearchers.TooLongResponsibilityChainSearcher;
-import net.webcumo.test.exercise106.violationsearchers.ViolationSearcher;
+import net.webcumo.test.exercise106.employee.Employee;
+import net.webcumo.test.exercise106.violations.ManagersSalaryTooHighSearcher;
+import net.webcumo.test.exercise106.violations.ManagersSalaryTooLowSearcher;
+import net.webcumo.test.exercise106.violations.TooLongResponsibilityChainSearcher;
+import net.webcumo.test.exercise106.violations.ViolationSearcher;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -28,7 +29,7 @@ class SalaryBalancerInitializationTest {
 
     @Test
     void givenSearchersRequiredThenConfigured() {
-        List<ViolationSearcher> configured =
+        List<ViolationSearcher<Employee>> configured =
                 SalaryBalancerInitializer.configureViolationSearchers();
         assertEquals(1, configured.stream()
                 .filter(ManagersSalaryTooHighSearcher.class::isInstance)

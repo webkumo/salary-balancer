@@ -3,10 +3,11 @@ package net.webcumo.test.exercise106.parser;
 import net.webcumo.test.exercise106.employee.Employee;
 import net.webcumo.test.exercise106.exceptions.parser.CannotParseNumberException;
 import net.webcumo.test.exercise106.exceptions.parser.IncorrectFieldsCountException;
+import net.webcumo.test.exercise106.tree.TreeElementsSource;
 
 import java.util.stream.Stream;
 
-public class EmployeesStringParser implements EmployeesSource {
+public class EmployeesStringParser implements TreeElementsSource<Employee> {
     private static final int FIELDS_COUNT = 5;
     private static final int CEO_FIELDS_COUNT = 4;
     private static final String DELIMITER = ",";
@@ -23,20 +24,20 @@ public class EmployeesStringParser implements EmployeesSource {
     }
 
     @Override
-    public Stream<EmployeeWithParentId> getEmployees() {
+    public Stream<Employee> getValues() {
         return stringSource.getStrings()
                 .map(this::parse);
     }
 
-    private EmployeeWithParentId parse(String inputString) {
+    private Employee parse(String inputString) {
         String[] fields = inputString.split(DELIMITER);
         validate(inputString, fields);
         try {
-            Employee employee = new Employee(getId(fields),
+            return new Employee(getId(fields),
                     getLastName(fields),
                     getFirstName(fields),
-                    getSalary(fields));
-            return new EmployeeWithParentId(employee, getParentId(fields));
+                    getSalary(fields),
+                    getParentId(fields));
         } catch (NumberFormatException e) {
             throw new CannotParseNumberException(e, inputString);
         }

@@ -1,14 +1,23 @@
 package net.webcumo.test.exercise106;
 
-import net.webcumo.test.exercise106.employee.EmployeeTreeBuilder;
-import net.webcumo.test.exercise106.exceptions.DataProcessingException;
-import net.webcumo.test.exercise106.exceptions.ErrorCodes;
+import net.webcumo.test.exercise106.employee.Employee;
+import net.webcumo.test.exercise106.employee.EmployeeTreBuilder;
+import net.webcumo.test.exercise106.exceptions.builder.ElementIdAlreadyUsedException;
+import net.webcumo.test.exercise106.exceptions.builder.NoRootFoundException;
+import net.webcumo.test.exercise106.exceptions.builder.OrphansFoundException;
+import net.webcumo.test.exercise106.exceptions.builder.TooManyRootsException;
+import net.webcumo.test.exercise106.exceptions.file.FileIOException;
+import net.webcumo.test.exercise106.exceptions.file.FileIsEmptyException;
+import net.webcumo.test.exercise106.exceptions.file.WrongHeaderException;
+import net.webcumo.test.exercise106.exceptions.parser.CannotParseNumberException;
+import net.webcumo.test.exercise106.exceptions.parser.IncorrectFieldsCountException;
+import net.webcumo.test.exercise106.tree.TreeBuilder;
 import net.webcumo.test.exercise106.parser.EmployeeFileParser;
 import net.webcumo.test.exercise106.parser.EmployeesStringParser;
-import net.webcumo.test.exercise106.violationsearchers.ManagersSalaryTooHighSearcher;
-import net.webcumo.test.exercise106.violationsearchers.ManagersSalaryTooLowSearcher;
-import net.webcumo.test.exercise106.violationsearchers.TooLongResponsibilityChainSearcher;
-import net.webcumo.test.exercise106.violationsearchers.ViolationSearcher;
+import net.webcumo.test.exercise106.violations.ManagersSalaryTooHighSearcher;
+import net.webcumo.test.exercise106.violations.ManagersSalaryTooLowSearcher;
+import net.webcumo.test.exercise106.violations.TooLongResponsibilityChainSearcher;
+import net.webcumo.test.exercise106.violations.ViolationSearcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,165 +53,120 @@ class SalaryBalancerIntegrationTest {
     @Test
     void givenNoFileThenErrorMessage() {
         String fileName = "the file not exists.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.FILE_NOT_FOUND.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains(fileName));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(FileIOException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWithoutHeaderThenErrorMessage() {
         String fileName = "src/test/resources/no-headers.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.WRONG_FORMAT.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("The header of file is wrong, should be:"));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(WrongHeaderException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWithOnlyHeaderThenErrorMessage() {
         String fileName = "src/test/resources/headers.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.WRONG_FORMAT.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("There is nothing to parse in the file"));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(FileIsEmptyException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWithOrphansThenErrorMessage() {
         String fileName = "src/test/resources/orphans.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.ORPHANS.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("There was found orphans in file"));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(OrphansFoundException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWithDuplicatesThenErrorMessage() {
         String fileName = "src/test/resources/duplicate.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.ALREADY_USED.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("is already registered"));
-        }
+                    SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(ElementIdAlreadyUsedException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWith2CeoThenErrorMessage() {
         String fileName = "src/test/resources/2ceo.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.TOO_MANY_CEOS.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("Found more than one CEOs"));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(TooManyRootsException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWithNoCeoThenErrorMessage() {
         String fileName = "src/test/resources/no_ceo.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.NO_CEO.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("CEO was not found in the file"));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(NoRootFoundException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWithNonNumberInNumericFieldThenErrorMessage() {
         String fileName = "src/test/resources/non_number.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.WRONG_FORMAT.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("Cannot parse number:"));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(CannotParseNumberException.class, salaryBalancer::run);
     }
 
     @Test
     void givenFileWithIncorrectFieldsCountThenErrorMessage() {
         String fileName = "src/test/resources/wrong_fields.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-        try {
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
-            fail();
-        } catch (DataProcessingException e) {
-            assertEquals(ErrorCodes.WRONG_FORMAT.getErrorCode(), e.getErrorCode());
-            assertTrue(errCaptor.toString().contains("count of fields"));
-        }
+        SalaryBalancer salaryBalancer = getSalaryBalancer(builder, violationSearchers);
+        assertThrows(IncorrectFieldsCountException.class, salaryBalancer::run);
     }
 
     @Test
     void givenCorrectFileWithViolationsThenOnlyMainOutput() {
         String fileName = "src/test/resources/sample.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
+            getSalaryBalancer(builder, violationSearchers).run();
         assertEquals(0, errCaptor.size());
         assertTrue(outCaptor.toString()
                 .contains("Manager Chekov Martin (124) has lower than 120% of it's subordinates average."));
@@ -211,13 +175,19 @@ class SalaryBalancerIntegrationTest {
     @Test
     void givenCorrectFileWithoutViolationsThenOnlyMainOutput() {
         String fileName = "src/test/resources/correct.csv";
-        EmployeeTreeBuilder builder =
-                new EmployeeTreeBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
-        List<ViolationSearcher> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
+        TreeBuilder<Employee> builder =
+                new EmployeeTreBuilder(new EmployeesStringParser(new EmployeeFileParser(fileName)));
+        List<ViolationSearcher<Employee>> violationSearchers = List.of(new ManagersSalaryTooLowSearcher(),
                 new ManagersSalaryTooHighSearcher(),
                 new TooLongResponsibilityChainSearcher());
-            new SalaryBalancer(builder, violationSearchers, new ExceptionThrowerOnErrorCode()).run();
+            getSalaryBalancer(builder, violationSearchers).run();
         assertEquals(0, errCaptor.size());
         assertEquals(0, outCaptor.size());
+    }
+
+    private static SalaryBalancer getSalaryBalancer(TreeBuilder<Employee> builder, List<ViolationSearcher<Employee>> violationSearchers) {
+        return new SalaryBalancer(builder,
+                violationSearchers,
+                new ExceptionThrowerOnErrorCode());
     }
 }
